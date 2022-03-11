@@ -1,0 +1,11 @@
+language: go
+
+go:
+- master # The latest version of Go.
+
+script:
+# If a Makefile is present by any of the following names, 
+# then no further actions are taken in the install step
+- go get ${gobuild_args} ./...
+
+- go test -v ./...
