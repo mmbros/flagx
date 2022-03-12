@@ -1,15 +1,16 @@
-package flagx
+package flagx_test
 
 import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
-)
 
-// const appname string = "app"
+	"github.com/mmbros/flagx"
+)
 
 const (
 	defaultConfigType = "yaml"
@@ -84,11 +85,11 @@ Prints list of available sources.
 // It is global in order to test the values
 var argsQuotes *appArgs
 
-func initApp() *Command {
+func initApp() *flagx.Command {
 
-	app := &Command{
+	app := &flagx.Command{
 		ParseExec: runQuotesApp,
-		SubCmd: map[string]*Command{
+		SubCmd: map[string]*flagx.Command{
 			"get,g": {
 				ParseExec: runQuotesGet,
 			},
@@ -124,15 +125,15 @@ func runQuotesGet(name string, arguments []string) error {
 	fs.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), usageGet, name)
 	}
-	AliasedStringVar(fs, &argsQuotes.config, "config,c", "", "config file")
-	AliasedStringVar(fs, &argsQuotes.configType, "config-type", defaultConfigType, "used if config file does not have the extension in the name; accepted values are: YAML, TOML and JSON")
-	AliasedBoolVar(fs, &argsQuotes.dryrun, "dry-run,n", false, "perform a trial run with no request/updates made")
-	AliasedStringVar(fs, &argsQuotes.proxy, "proxy,p", "", "default proxy")
-	AliasedIntVar(fs, &argsQuotes.workers, "workers,w", defaultWorkers, "number of workers")
-	AliasedStringVar(fs, &argsQuotes.database, "database,d", "", "sqlite3 database used to save the quotes")
-	AliasedStringVar(fs, &argsQuotes.mode, "mode,m", defaultMode, `result mode: "1" first success or last error (default), "U" all errors until first success, "A" all`)
-	AliasedStringsVar(fs, &argsQuotes.isins, "isins,i", "list of isins to get the quotes")
-	AliasedStringsVar(fs, &argsQuotes.sources, "sources,s", "list of sources to get the quotes from")
+	flagx.AliasedStringVar(fs, &argsQuotes.config, "config,c", "", "config file")
+	flagx.AliasedStringVar(fs, &argsQuotes.configType, "config-type", defaultConfigType, "used if config file does not have the extension in the name; accepted values are: YAML, TOML and JSON")
+	flagx.AliasedBoolVar(fs, &argsQuotes.dryrun, "dry-run,n", false, "perform a trial run with no request/updates made")
+	flagx.AliasedStringVar(fs, &argsQuotes.proxy, "proxy,p", "", "default proxy")
+	flagx.AliasedIntVar(fs, &argsQuotes.workers, "workers,w", defaultWorkers, "number of workers")
+	flagx.AliasedStringVar(fs, &argsQuotes.database, "database,d", "", "sqlite3 database used to save the quotes")
+	flagx.AliasedStringVar(fs, &argsQuotes.mode, "mode,m", defaultMode, `result mode: "1" first success or last error (default), "U" all errors until first success, "A" all`)
+	flagx.AliasedStringsVar(fs, &argsQuotes.isins, "isins,i", "list of isins to get the quotes")
+	flagx.AliasedStringsVar(fs, &argsQuotes.sources, "sources,s", "list of sources to get the quotes from")
 
 	err := fs.Parse(arguments)
 	return err
@@ -147,9 +148,9 @@ func runQuotesTor(name string, arguments []string) error {
 	fs.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), usageTor, name)
 	}
-	AliasedStringVar(fs, &argsQuotes.config, "config,c", "", "config file")
-	AliasedStringVar(fs, &argsQuotes.configType, "config-type", defaultConfigType, "used if config file does not have the extension in the name; accepted values are: YAML, TOML and JSON")
-	AliasedStringVar(fs, &argsQuotes.proxy, "proxy,p", "", "default proxy")
+	flagx.AliasedStringVar(fs, &argsQuotes.config, "config,c", "", "config file")
+	flagx.AliasedStringVar(fs, &argsQuotes.configType, "config-type", defaultConfigType, "used if config file does not have the extension in the name; accepted values are: YAML, TOML and JSON")
+	flagx.AliasedStringVar(fs, &argsQuotes.proxy, "proxy,p", "", "default proxy")
 
 	err := fs.Parse(arguments)
 	return err
@@ -208,8 +209,8 @@ func Test_QuotesApp(t *testing.T) {
 		},
 		{
 			name:    "app unknown command",
-			args:    "   cmd  ",
-			wantErr: ErrCommandNotFound,
+			args:    "cmd",
+			wantErr: flagx.ErrCommandNotFound,
 		},
 		{
 			name:       "app get help",
@@ -278,10 +279,8 @@ func Test_QuotesApp(t *testing.T) {
 
 			app := initApp()
 
-			// err := ParseExec(app)
-
-			args := splitTrimSpace(tt.args, " ")
-			err := app.handleSubCmd(AppName, args)
+			os.Args = strings.Split(AppName+" "+tt.args, " ")
+			err := flagx.ParseExec(app)
 
 			if err != nil {
 				if (tt.wantErr == nil) && (tt.wantErrMsg == "") {
