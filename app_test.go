@@ -138,8 +138,7 @@ func Test_App(t *testing.T) {
 			flag.CommandLine.SetOutput(&out)
 
 			os.Args = strings.Split("app "+tt.args, " ")
-			t.Log(os.Args)
-			err := flagx.ParseExec(app)
+			err := flagx.Run(app)
 
 			if err != nil {
 				if (tt.wantErr == nil) && (tt.wantErrMsg == "") {

@@ -280,7 +280,7 @@ func Test_QuotesApp(t *testing.T) {
 			app := initApp()
 
 			os.Args = strings.Split(AppName+" "+tt.args, " ")
-			err := flagx.ParseExec(app)
+			err := flagx.Run(app)
 
 			if err != nil {
 				if (tt.wantErr == nil) && (tt.wantErrMsg == "") {

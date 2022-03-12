@@ -26,13 +26,13 @@ var app = &Command{
 }
 ```
 
-To execute the `app` Command instance with the command line arguments call the `ParseExec` module function.
+To execute the `app` Command instance with the command line arguments call the `Run` module function.
 
 ```golang
-err := ParseExec(app)
+err := flagx.Run(app)
 ```
 
-The `ParseExec` module function in turn calls the `ParseExec` function of the `app` command or the `import` sub-command based on the command line arguments.
+The `Run` module function in turn calls the `ParseExec` function of the `app` command or the `action` sub-command based on the command-line arguments.
 Each `ParseExec` function first parse the passed arguments, then execute the specific work.
 
 ```golang
@@ -54,7 +54,7 @@ The `AliasedStringsVar` defines an array of strings flag with name `params` and 
 The command line
 
 ```shell
-app imp --params str1,str2 -p str3 -params str4 -p str5,str6
+app action --params str1,str2 -p str3 -params str4 -p str5,str6
 ```
 
 will execute the `execAction` function with `[]string{"str1", "str2", "str3", "str4", "str5", "str6"}` strings.

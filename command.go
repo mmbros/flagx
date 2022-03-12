@@ -70,10 +70,10 @@ func (cmd *Command) handleSubCmd(fullname string, arguments []string) error {
 	return wrapNameErrorString(ErrCommandNotFound, fullname, arg0)
 }
 
-// ParseExec execute the `root` Command with the command line arguments.
-// The name of the `root` command is obtained from the `os.Args[0]` argument.
-func ParseExec(root *Command) error {
+// Run execute the `app` command with the command-line arguments.
+// The name of the `app` command is obtained from the `os.Args[0]` argument.
+func Run(app *Command) error {
 	appname := path.Base(os.Args[0])
 
-	return root.handleSubCmd(appname, os.Args[1:])
+	return app.handleSubCmd(appname, os.Args[1:])
 }
