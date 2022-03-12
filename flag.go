@@ -6,7 +6,27 @@ import (
 	"strings"
 )
 
+// IsPassed checks if flag was provided.
+// It returns true if at least one alias of the flag was found.
+// names is the comma separated aliases of the flag.
+
+func IsPassed(fs *flag.FlagSet, names string) bool {
+	found := false
+
+	fs.Visit(func(f *flag.Flag) {
+		anames := splitTrimSpace(names, ",")
+		for _, name := range anames {
+			if f.Name == name {
+				found = true
+				return
+			}
+		}
+	})
+	return found
+}
+
 // AliasedStringVar defines a string flag with specified names, default value, and usage string.
+// The `names` argument is the comma separated aliases of the flag.
 // The specified usage string is used for the primary flag name only.
 // The usage string of a secondary flag name specifies that it is an alias of the primary name.
 // The argument p points to a string variable in which to store the value of the flag.
@@ -73,6 +93,7 @@ func (o *astring) Set(value string) error {
 // The specified usage string is used for the primary flag name only.
 // The usage string of a secondary flag name specifies that it is an alias of the primary name.
 // The argument p points to a []string variable in which to store the value of the flag.
+// Note: no default value is given.
 func AliasedStringsVar(fs *flag.FlagSet, p *[]string, names string, usage string) {
 	var ss *astring = (*astring)(p)
 	anames := splitTrimSpace(names, ",")

@@ -3,6 +3,7 @@ package flagx
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -109,6 +110,88 @@ func Test_AliasedStringsVar(t *testing.T) {
 				if !reflect.DeepEqual(astr, tt.wantStrings) {
 					t.Errorf("strings: got %v, want %v", astr, tt.wantStrings)
 				}
+			}
+		})
+	}
+}
+
+func Test_IsPassed_Int(t *testing.T) {
+
+	const defValue = 99
+
+	tests := []struct {
+		name       string
+		args       string
+		flagNames  string
+		wantPassed bool
+		wantValue  int
+	}{
+		{
+			name:       "empty command line",
+			args:       "",
+			flagNames:  "i,int",
+			wantPassed: false,
+			wantValue:  defValue,
+		},
+		{
+			name:       "arg --other",
+			args:       "--other 12",
+			flagNames:  "i,int",
+			wantPassed: false,
+			wantValue:  defValue,
+		},
+		{
+			name:       "arg --int",
+			args:       fmt.Sprintf("--int %v", defValue),
+			flagNames:  "i,int",
+			wantPassed: true,
+			wantValue:  defValue,
+		},
+		{
+			name:       "arg -i",
+			args:       "-i 12",
+			flagNames:  "int,i",
+			wantPassed: true,
+			wantValue:  12,
+		},
+		{
+			name:       "multiple win the last",
+			args:       "-i 12 -o 13 --int 14 --other 15",
+			flagNames:  "int,i",
+			wantPassed: true,
+			wantValue:  14,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			var value int
+			var other int
+
+			var out strings.Builder
+			fs := flag.NewFlagSet("test", flag.ExitOnError)
+			fs.SetOutput(&out)
+
+			AliasedIntVar(fs, &value, "i,int", defValue, "usage int")
+			AliasedIntVar(fs, &other, "o,other", defValue, "usage other")
+
+			args := splitTrimSpace(tt.args, " ")
+			err := fs.Parse(args)
+
+			if err != nil {
+				t.Errorf("error: got %q, want nil", err)
+				return
+			}
+
+			gotPassed := IsPassed(fs, tt.flagNames)
+
+			if gotPassed != tt.wantPassed {
+				t.Errorf("IsFlagPassed(%q): got %v, want %v", tt.flagNames, gotPassed, tt.wantPassed)
+			}
+
+			if value != tt.wantValue {
+				t.Errorf("Value(%q): got %v, want %v", tt.flagNames, value, tt.wantValue)
 			}
 		})
 	}

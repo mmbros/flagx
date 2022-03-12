@@ -12,13 +12,14 @@ Main features:
 - sub commands management
 - alias of command and flag names
 - array of string flag type
+- check if a flag was passed
 
 For example the next code defines an `app` Command instance with a sub-command with name `action` and aliases `act`, `ac` and `a`. Note that only the names of the sub-commands are defined; the command name itself is not defined in the Command type. The name of the root command is obtained from the `os.Args[0]` parameter.
 
 ```golang
-var app = &Command{
+var app = &flagx.Command{
     ParseExec: runApp,
-    SubCmd: map[string]*Command{
+    SubCmd: map[string]*flagx.Command{
         "action,act,ac,a": {
             ParseExec: runAction,
         },
@@ -39,7 +40,7 @@ Each `ParseExec` function first parse the passed arguments, then execute the spe
 func runAction(name string, arguments []string) error {
     var params []string
     fs := flag.NewFlagSet(name, flag.ContinueOnError)
-    AliasedStringsVar(fs, &params, "params,p", "description of the parameters")
+    flagx.AliasedStringsVar(fs, &params, "params,p", "description of the parameters")
 
     err := fs.Parse(arguments)
 
@@ -50,8 +51,8 @@ func runAction(name string, arguments []string) error {
 }
 ```
 
-The `AliasedStringsVar` defines an array of strings flag with name `params` and alias `p`.
-The command line
+The `AliasedStringsVar` function defines an array of strings flag with name `params` and alias `p`.
+The command-line
 
 ```shell
 app action --params str1,str2 -p str3 -params str4 -p str5,str6
