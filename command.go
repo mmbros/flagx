@@ -19,7 +19,7 @@ var (
 //
 // cmdfullname: the full name of the command (example: "app cmd subcmd")
 // arguments:   the arguments of the command
-type ParseExecFunc func(cmdfullname string, arguments []string) error
+type ParseExecFunc func(fullname string, arguments []string) error
 
 // Command represents a node of the commands tree.
 // Each node has the function to be called if the command is executed
@@ -32,9 +32,9 @@ type Command struct {
 // handleSubCmd checks if the command must be executed
 // or if a sub-command must be (recursivelly) called.
 //
-// cmdfullname is the join of the ancestors or self command names, starting from root command.
+// fullname is the join of the ancestors or self command names, starting from root command.
 // example: cmdfullname = "appname cmd1 subcmd11"
-func (cmd *Command) handleSubCmd(cmdfullname string, arguments []string) error {
+func (cmd *Command) handleSubCmd(fullname string, arguments []string) error {
 
 	var arg0 string
 	if len(arguments) > 0 {
@@ -48,26 +48,26 @@ func (cmd *Command) handleSubCmd(cmdfullname string, arguments []string) error {
 		// then parse the current command
 
 		if cmd.ParseExec == nil {
-			return wrapNameError(ErrNoExecFunc, cmdfullname)
+			return wrapNameError(ErrNoExecFunc, fullname)
 		}
 
-		return cmd.ParseExec(cmdfullname, arguments)
+		return cmd.ParseExec(fullname, arguments)
 	}
 
 	// arg0 must be the name of a sub command
 	for names, subcmd := range cmd.SubCmd {
 		ns := splitTrimSpace(names, ",")
 		if len(ns) == 0 {
-			return wrapNameErrorString(ErrInvalidCommandName, cmdfullname, names)
+			return wrapNameErrorString(ErrInvalidCommandName, fullname, names)
 		}
 
 		if contains(ns, arg0) {
 			// parse the subcommand
-			return subcmd.handleSubCmd(cmdfullname+" "+ns[0], arguments[1:])
+			return subcmd.handleSubCmd(fullname+" "+ns[0], arguments[1:])
 		}
 	}
 
-	return wrapNameErrorString(ErrCommandNotFound, cmdfullname, arg0)
+	return wrapNameErrorString(ErrCommandNotFound, fullname, arg0)
 }
 
 // ParseExec execute the `root` Command with the command line arguments.
