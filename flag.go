@@ -121,3 +121,17 @@ func AliasedInt64Var(fs *flag.FlagSet, p *int64, names string, value int64, usag
 	}
 }
 
+// AliasedFloat64Var defines an float64 flag with specified names, default value, and usage string.
+// The specified usage string is used for the primary flag name only.
+// The usage string of a secondary flag name specifies that it is an alias of the primary name.
+// The argument p points to an float64 variable in which to store the value of the flag.
+func AliasedFloat64Var(fs *flag.FlagSet, p *float64, names string, value float64, usage string) {
+	anames := splitTrimSpace(names, ",")
+	for j, name := range anames {
+		if j == 1 {
+			// redefine usage for the aliased names
+			usage = "alias of \"" + anames[0] + "\""
+		}
+		fs.Float64Var(p, name, value, usage)
+	}
+}
