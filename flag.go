@@ -105,3 +105,19 @@ func AliasedStringsVar(fs *flag.FlagSet, p *[]string, names string, usage string
 		fs.Var(ss, name, usage)
 	}
 }
+
+// AliasedInt64Var defines an int64 flag with specified names, default value, and usage string.
+// The specified usage string is used for the primary flag name only.
+// The usage string of a secondary flag name specifies that it is an alias of the primary name.
+// The argument p points to an int64 variable in which to store the value of the flag.
+func AliasedInt64Var(fs *flag.FlagSet, p *int64, names string, value int64, usage string) {
+	anames := splitTrimSpace(names, ",")
+	for j, name := range anames {
+		if j == 1 {
+			// redefine usage for the aliased names
+			usage = "alias of \"" + anames[0] + "\""
+		}
+		fs.Int64Var(p, name, value, usage)
+	}
+}
+

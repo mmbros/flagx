@@ -11,12 +11,14 @@ import (
 
 func Test_AliasedFlagSet(t *testing.T) {
 	var (
-		str1  string
-		str2  string
-		int1  int
-		int2  int
-		bool1 bool
-		bool2 bool
+		str1   string
+		str2   string
+		int1   int
+		int2   int
+		bool1  bool
+		bool2  bool
+		int641 int64
+		int642 int64
 	)
 
 	fs := flag.NewFlagSet("test", flag.ExitOnError)
@@ -28,6 +30,9 @@ func Test_AliasedFlagSet(t *testing.T) {
 	AliasedBoolVar(fs, &bool2, "bool2,b2,alias-bool2", true, "usage bool2")
 	fs.BoolVar(&bool1, "bool1", false, "usage bool1")
 
+	fs.Int64Var(&int641, "int641", 0, "usage int641")
+	AliasedInt64Var(fs, &int642, "int642,i642", 99999999999, "usage int642")
+
 	var buf strings.Builder
 
 	fs.SetOutput(&buf)
@@ -36,7 +41,8 @@ func Test_AliasedFlagSet(t *testing.T) {
 	got := buf.String()
 
 	for _, want := range []string{"-str1 string", "-int1 int", "-str2 string", "-s2 string",
-		"-int2 int", "-i2 int", "-bool2", "-b2", "-alias-bool2", "-bool1"} {
+		"-int2 int", "-i2 int", "-bool2", "-b2", "-alias-bool2", "-bool1",
+		"-int641 int", "-int642 int", "-i642 int"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("PrintDefaults(): got %v, want substring %v", got, want)
 		}
